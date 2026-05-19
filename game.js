@@ -110,7 +110,7 @@ this.lastShotTime = 0;
         const halfW = this.width / 2;
         const halfH = this.height / 2;
         this.x = Math.max(halfW, Math.min(400 - halfW, this.x));
-        this.y = Math.max(halfH, Math.min(600 - halfH, this.y));
+        this.y = Math.max(120, Math.min(540, this.y));
 
         if (this.invulnerable) {
             this.invulnerableTimer--;
@@ -181,7 +181,7 @@ class Bullet {
         this.x = x;
         this.y = y;
         this.angle = angle;
-        this.speed = speed;
+        this.speed = 3;
         this.width = isEnemy ? 5 : 14;
         this.height = isEnemy ? 5 : 6;
         this.isEnemy = isEnemy;
@@ -318,7 +318,7 @@ class Boss {
         this.targetY = 80;
         this.points = 10000;
         this.xDirection = 1;
-        this.xSpeed = 1.5;
+        this.xSpeed = 3;
     }
 
     update() {
@@ -366,31 +366,29 @@ class Boss {
     // =========================================
     if (this.phase === 1) {
 
-        if (this.timer % 16 === 0) {
+    if (this.timer % 12 === 0) {
 
-    for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 9; i++) {
 
-        const spread = (i - 2.5) * 0.20;
+            const angle =
+                Math.PI / 2 +
+                (i - 4) * 0.08;
 
-        const angle =
-            Math.PI / 2 +
-            spread +
-            Math.sin((this.timer + i * 10) * 0.06) * 0.22;
+            const bullet = new Bullet(
+                this.x,
+                this.y,
+                angle,
+                2.4,
+                true
+            );
 
-        const bullet = new Bullet(
-            this.x,
-            this.y + 10,
-            angle,
-            2.0,
-            true
-        );
+            bullet.width = 8;
+            bullet.height = 8;
 
-        this.game.bullets.push(bullet);
+            this.game.bullets.push(bullet);
+        }
     }
-
-    this.game.sound.enemyShoot();
 }
-    }
 
     // =========================================
     // ФАЗА 2 — БОЛЬШИЕ ПУЛИ С КРАЕВ
@@ -684,53 +682,31 @@ class Game {
 
     defineWavePatterns() {
         this.patterns = {
-            straightShooter: {
-                health: 2, points: 100,
-                update: (enemy) => {
-                    enemy.y += 1.8;
-                    if (enemy.y < 450 && enemy.timer % 75 === 0) {
-                        const angle = Math.atan2(this.player.y - enemy.y, this.player.x - enemy.x);
-                        this.bullets.push(new Bullet(enemy.x, enemy.y, angle, 2.5, true));
-                        this.sound.enemyShoot();
-                    }
-                }
-            },
-            sineFan: {
-                health: 3, points: 150,
-                update: (enemy) => {
-                    enemy.y += 1.5;
-                    enemy.x += Math.sin(enemy.timer * 0.04) * 2.5;
-                    if (enemy.y < 450 && enemy.timer % 65 === 0) {
-                        const baseAngle = Math.atan2(this.player.y - enemy.y, this.player.x - enemy.x);
-                        for (let i = -1; i <= 1; i++) {
-                            this.bullets.push(new Bullet(enemy.x, enemy.y, baseAngle + i * 0.3, 3, true));
-                        }
-                        this.sound.enemyShoot();
-                    }
-                }
-            },
-            spiral: {
 
-    health: 5,
-    points: 220,
+    // =====================================
+    // STREAM LEFT
+    // =====================================
 
-    update: (enemy) => {
+    streamLeft: {
 
-        enemy.y += 0.8;
+        health: 6,
+        points: 250,
 
-        if (enemy.y < 420 && enemy.timer % 7 === 0) {
+        update: (enemy) => {
 
-            const base = enemy.timer * 0.12;
+            enemy.y += 0.5;
 
-            for (let i = 0; i < 2; i++) {
+            if (enemy.timer % 10 === 0) {
 
-                const angle = base + Math.PI * i;
+                const angle =
+                    Math.PI / 2 +
+                    0.22;
 
                 const bullet = new Bullet(
                     enemy.x,
                     enemy.y,
                     angle,
-                    2.1,
+                    2.8,
                     true
                 );
 
@@ -739,312 +715,307 @@ class Game {
 
                 this.bullets.push(bullet);
             }
-
-            this.sound.enemyShoot();
         }
-    }
-},
-            sideSweeper: {
-                health: 4, points: 180,
-                update: (enemy) => {
-                    if (!enemy.initialized) {
-                        enemy.initialized = true;
-                        enemy.xSpeed = (enemy.x < 200) ? 1.2 : -1.2;
-                    }
-                    enemy.x += enemy.xSpeed;
-                    enemy.y += 1.3;
-                    if (enemy.y < 450 && enemy.timer % 60 === 0) {
-                        const angle = Math.atan2(this.player.y - enemy.y, this.player.x - enemy.x);
-                        for (let j = 0; j < 2; j++) {
-                            setTimeout(() => {
-                                if (enemy.health > 0) {
-                                    this.bullets.push(new Bullet(enemy.x, enemy.y, angle, 3.5, true));
-                                    this.sound.enemyShoot();
-                                }
-                            }, j * 120);
-                        }
-                    }
+    },
+
+    // =====================================
+    // STREAM RIGHT
+    // =====================================
+
+    streamRight: {
+
+        health: 6,
+        points: 250,
+
+        update: (enemy) => {
+
+            enemy.y += 0.5;
+
+            if (enemy.timer % 10 === 0) {
+
+                const angle =
+                    Math.PI / 2 -
+                    0.22;
+
+                const bullet = new Bullet(
+                    enemy.x,
+                    enemy.y,
+                    angle,
+                    2.8,
+                    true
+                );
+
+                bullet.width = 8;
+                bullet.height = 8;
+
+                this.bullets.push(bullet);
+            }
+        }
+    },
+
+    // =====================================
+    // CROSS SHOOTER
+    // =====================================
+
+    crossShooter: {
+
+        health: 8,
+        points: 400,
+
+        update: (enemy) => {
+
+            enemy.y += 0.7;
+
+            if (enemy.timer % 50 === 0) {
+
+                for (let i = 0; i < 8; i++) {
+
+                    const angle =
+                        (Math.PI * 2 / 8) * i;
+
+                    const bullet = new Bullet(
+                        enemy.x,
+                        enemy.y,
+                        angle,
+                        2.2,
+                        true
+                    );
+
+                    bullet.width = 9;
+                    bullet.height = 9;
+
+                    this.bullets.push(bullet);
                 }
             }
-        };
+        }
+    },
+
+    // =====================================
+    // WALL LEFT
+    // =====================================
+
+    wallLeft: {
+
+        health: 12,
+        points: 600,
+
+        update: (enemy) => {
+
+            enemy.y += 0.3;
+
+            if (enemy.timer % 6 === 0) {
+
+                for (let i = 0; i < 7; i++) {
+
+                    if (i === 3) continue;
+
+                    const bullet = new Bullet(
+                        0,
+                        70 + i * 65,
+                        0,
+                        1.8,
+                        true
+                    );
+
+                    bullet.width = 18;
+                    bullet.height = 18;
+
+                    this.bullets.push(bullet);
+                }
+            }
+        }
+    },
+
+    // =====================================
+    // WALL RIGHT
+    // =====================================
+
+    wallRight: {
+
+        health: 12,
+        points: 600,
+
+        update: (enemy) => {
+
+            enemy.y += 0.3;
+
+            if (enemy.timer % 6 === 0) {
+
+                for (let i = 0; i < 7; i++) {
+
+                    if (i === 2) continue;
+
+                    const bullet = new Bullet(
+                        400,
+                        70 + i * 65,
+                        Math.PI,
+                        1.8,
+                        true
+                    );
+
+                    bullet.width = 18;
+                    bullet.height = 18;
+
+                    this.bullets.push(bullet);
+                }
+            }
+        }
+    },
+
+    // =====================================
+    // ROTATOR
+    // =====================================
+
+    rotator: {
+
+        health: 20,
+        points: 1200,
+
+        update: (enemy) => {
+
+            if (!enemy.locked) {
+
+                enemy.locked = true;
+                enemy.y = 120;
+            }
+
+            enemy.timer++;
+
+            if (enemy.timer % 4 === 0) {
+
+                const base =
+                    enemy.timer * 0.05;
+
+                for (let i = 0; i < 2; i++) {
+
+                    const bullet = new Bullet(
+                        enemy.x,
+                        enemy.y,
+                        base + Math.PI * i,
+                        2.3,
+                        true
+                    );
+
+                    bullet.width = 10;
+                    bullet.height = 10;
+
+                    this.bullets.push(bullet);
+                }
+            }
+        }
+    }
+};
     }
 
     buildWave(waveNumber) {
+        buildWave(waveNumber) {
 
     const queue = [];
 
     // =====================================
-    // WAVE 1
-    // ОБУЧЕНИЕ БАЗОВОМУ ШОТУ
+    // WAVE 1 — CENTRAL STREAM
     // =====================================
 
     if (waveNumber === 1) {
 
-        for (let i = 0; i < 5; i++) {
-
-            queue.push({
-                type: 'straightShooter',
-                x: 70 + i * 65,
-                y: -40,
-                delay: i * 45
-            });
-        }
-    }
-
-    // =====================================
-    // WAVE 2
-    // МЕДЛЕННЫЕ ВЕЕРА -> УЧИМ МИКРОДОДЖ
-    // =====================================
-
-    else if (waveNumber === 2) {
-
-        for (let i = 0; i < 4; i++) {
-
-            queue.push({
-                type: 'sineFan',
-                x: 80 + i * 80,
-                y: -50,
-                delay: i * 55
-            });
-        }
-    }
-
-    // =====================================
-    // WAVE 3
-    // ЛАЗЕР/HOMING СТАНОВИТСЯ ПОЛЕЗЕН
-    // =====================================
-
-    else if (waveNumber === 3) {
-
         queue.push({
-            type: 'sideSweeper',
-            x: -20,
-            y: 120,
-            delay: 0
-        });
-
-        queue.push({
-            type: 'sideSweeper',
-            x: 420,
-            y: 180,
-            delay: 60
-        });
-
-        queue.push({
-            type: 'straightShooter',
-            x: 200,
-            y: -50,
-            delay: 120
-        });
-    }
-
-    // =====================================
-    // WAVE 4
-    // ПЕРВЫЙ "СТРЕСС"
-    // НО С БОЛЬШИМИ ПРОХОДАМИ
-    // =====================================
-
-    else if (waveNumber === 4) {
-
-        queue.push({
-            type: 'spiral',
-            x: 130,
-            y: -40,
-            delay: 0
-        });
-
-        queue.push({
-            type: 'spiral',
-            x: 270,
-            y: -40,
-            delay: 80
-        });
-
-        queue.push({
-            type: 'sineFan',
-            x: 200,
-            y: -60,
-            delay: 150
-        });
-    }
-
-    // =====================================
-    // WAVE 5
-    // ПЕРВАЯ ВОЛНА ПОД БОМБУ
-    // =====================================
-
-    else if (waveNumber === 5) {
-
-        for (let i = 0; i < 6; i++) {
-
-            queue.push({
-                type: 'straightShooter',
-                x: 40 + i * 60,
-                y: -30,
-                delay: i * 18
-            });
-        }
-
-        queue.push({
-            type: 'spiral',
-            x: 200,
-            y: -50,
-            delay: 120
-        });
-    }
-
-    // =====================================
-    // WAVE 6
-    // АКТИВНОЕ ПЕРЕКЛЮЧЕНИЕ ОРУЖИЯ
-    // =====================================
-
-    else if (waveNumber === 6) {
-
-        queue.push({
-            type: 'sideSweeper',
-            x: -20,
-            y: 120,
-            delay: 0
-        });
-
-        queue.push({
-            type: 'sideSweeper',
-            x: 420,
-            y: 120,
-            delay: 40
-        });
-
-        queue.push({
-            type: 'spiral',
-            x: 200,
-            y: -40,
-            delay: 100
-        });
-
-        queue.push({
-            type: 'sineFan',
-            x: 90,
-            y: -40,
-            delay: 170
-        });
-
-        queue.push({
-            type: 'sineFan',
-            x: 310,
-            y: -40,
-            delay: 200
-        });
-    }
-
-    // =====================================
-    // WAVE 7
-    // "НЕ БОЙСЯ БОМБ"
-    // =====================================
-
-    else if (waveNumber === 7) {
-
-        for (let i = 0; i < 3; i++) {
-
-            queue.push({
-                type: 'spiral',
-                x: 80 + i * 120,
-                y: -40,
-                delay: i * 50
-            });
-        }
-
-        queue.push({
-            type: 'sideSweeper',
-            x: -20,
-            y: 200,
-            delay: 180
-        });
-
-        queue.push({
-            type: 'sideSweeper',
-            x: 420,
-            y: 240,
-            delay: 220
-        });
-    }
-
-    // =====================================
-    // WAVE 8
-    // ПОЧТИ БОСС
-    // =====================================
-
-    else if (waveNumber === 8) {
-
-        queue.push({
-            type: 'spiral',
+            type: 'streamLeft',
             x: 120,
             y: -40,
             delay: 0
         });
 
         queue.push({
-            type: 'spiral',
+            type: 'streamRight',
+            x: 280,
+            y: -40,
+            delay: 80
+        });
+    }
+
+    // =====================================
+    // WAVE 2 — CROSS LANES
+    // =====================================
+
+    else if (waveNumber === 2) {
+
+        for (let i = 0; i < 3; i++) {
+
+            queue.push({
+                type: 'crossShooter',
+                x: 90 + i * 110,
+                y: -40,
+                delay: i * 70
+            });
+        }
+    }
+
+    // =====================================
+    // WAVE 3 — WALL OPENINGS
+    // =====================================
+
+    else if (waveNumber === 3) {
+
+        queue.push({
+            type: 'wallLeft',
+            x: 40,
+            y: -40,
+            delay: 0
+        });
+
+        queue.push({
+            type: 'wallRight',
+            x: 360,
+            y: -40,
+            delay: 120
+        });
+    }
+
+    // =====================================
+    // WAVE 4 — ROTATION
+    // =====================================
+
+    else if (waveNumber === 4) {
+
+        queue.push({
+            type: 'rotator',
+            x: 200,
+            y: 120,
+            delay: 0
+        });
+    }
+
+    // =====================================
+    // WAVE 5 — FINAL EXAM
+    // =====================================
+
+    else if (waveNumber === 5) {
+
+        queue.push({
+            type: 'streamLeft',
+            x: 120,
+            y: -40,
+            delay: 0
+        });
+
+        queue.push({
+            type: 'streamRight',
             x: 280,
             y: -40,
             delay: 40
         });
 
         queue.push({
-            type: 'spiral',
+            type: 'rotator',
             x: 200,
-            y: -40,
-            delay: 80
-        });
-
-        queue.push({
-            type: 'sideSweeper',
-            x: -20,
-            y: 160,
-            delay: 150
-        });
-
-        queue.push({
-            type: 'sideSweeper',
-            x: 420,
-            y: 160,
-            delay: 190
-        });
-    }
-
-    // =====================================
-    // WAVE 9
-    // ФИНАЛЬНЫЙ ЭКЗАМЕН
-    // =====================================
-
-    else if (waveNumber === 9) {
-
-        for (let i = 0; i < 4; i++) {
-
-            queue.push({
-                type: 'spiral',
-                x: 60 + i * 90,
-                y: -40,
-                delay: i * 35
-            });
-        }
-
-        queue.push({
-            type: 'sideSweeper',
-            x: -20,
-            y: 180,
-            delay: 180
-        });
-
-        queue.push({
-            type: 'sideSweeper',
-            x: 420,
-            y: 180,
-            delay: 220
+            y: 120,
+            delay: 160
         });
     }
 
     return queue;
 }
+   
 
     nextWave() {
         this.wave++;
