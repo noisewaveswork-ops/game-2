@@ -181,7 +181,7 @@ class Bullet {
         this.x = x;
         this.y = y;
         this.angle = angle;
-        this.speed = 3;
+        this.speed = speed;
         this.width = isEnemy ? 5 : 14;
         this.height = isEnemy ? 5 : 6;
         this.isEnemy = isEnemy;
