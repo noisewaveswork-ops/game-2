@@ -1234,8 +1234,8 @@ class Game {
         document.querySelector('#gameOver h2').style.color = '#7ab6ff';
         this.sound.waveStart();
         
-        if (this.bgmElement) {
-            this.bgmElement.pause();
+        if (this.sound.bgmElement) {
+            this.sound.bgmElement.pause();
         }
     }
 
@@ -1390,8 +1390,8 @@ if (this.laserMode) {
         document.querySelector('#gameOver h2').textContent = 'Игра окончена!';
         this.sound.playerDeath();
         
-        if (this.bgmElement) {
-            this.bgmElement.pause();
+        if (this.sound.bgmElement) {
+            this.sound.bgmElement.pause();
         }
     }
 
@@ -1575,27 +1575,29 @@ this.ctx.restore();
         requestAnimationFrame((nextTimestamp) => this.gameLoop(nextTimestamp));
     }
 }
-window.addEventListener('message', (event) => {
-    if (event.data === 'pauseMusic') {
-        const bgm = document.getElementById('bgMusic');
-        if (bgm) {
-            bgm.pause();
-            bgm.currentTime = 0;
-        }
-
-        if (window.game && window.game.sound) {
-            window.game.sound.pauseAll();
-        }
-    }
-});
-
-window.addEventListener('pagehide', () => {
-    window.postMessage('pauseMusic', '*');
-});
-
 document.addEventListener('visibilitychange', () => {
+
+    const bgm = document.getElementById('bgMusic');
+
+    if (!bgm) return;
+
+    // вкладка скрыта
     if (document.hidden) {
-        window.postMessage('pauseMusic', '*');
+
+        bgm.pause();
+
+        if (window.game?.sound?.ctx) {
+            window.game.sound.ctx.suspend();
+        }
+
+    } else {
+
+        // возвращение в игру
+        bgm.play().catch(() => {});
+
+        if (window.game?.sound?.ctx) {
+            window.game.sound.ctx.resume();
+        }
     }
 });
 
