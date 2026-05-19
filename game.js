@@ -7,19 +7,37 @@ class SoundManager {
     }
 
     init() {
-        if (this.initialized) return;
-        try {
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const buf = this.ctx.createBuffer(1, 1, 22050);
-            const src = this.ctx.createBufferSource();
-            src.buffer = buf;
-            src.connect(this.ctx.destination);
-            src.start(0);
-        } catch(e) {
-            console.warn('Web Audio API не поддерживается');
+    if (this.initialized) {
+
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
         }
-        this.initialized = true;
+
+        return;
     }
+
+    try {
+
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+
+        const buf = this.ctx.createBuffer(1, 1, 22050);
+        const src = this.ctx.createBufferSource();
+
+        src.buffer = buf;
+        src.connect(this.ctx.destination);
+        src.start(0);
+
+    } catch(e) {
+
+        console.warn('Web Audio API не поддерживается');
+    }
+
+    this.initialized = true;
+}
 
     playTone(freq, duration, type = 'square', volume = 0.15) {
         if (!this.ctx) return;
@@ -362,23 +380,23 @@ class Boss {
     }
 
     // =========================================
-    // ФАЗА 1 — СИНУС ВОЛНЫ
-    // =========================================
-    if (this.phase === 1) {
+// ФАЗА 1 — МЯГКИЕ ВОЛНЫ
+// =========================================
+if (this.phase === 1) {
 
-    if (this.timer % 12 === 0) {
+    if (this.timer % 22 === 0) {
 
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < 5; i++) {
 
             const angle =
                 Math.PI / 2 +
-                (i - 4) * 0.08;
+                (i - 2) * 0.18;
 
             const bullet = new Bullet(
                 this.x,
                 this.y,
                 angle,
-                2.4,
+                1.9,
                 true
             );
 
@@ -387,6 +405,8 @@ class Boss {
 
             this.game.bullets.push(bullet);
         }
+
+        this.game.sound.enemyShoot();
     }
 }
 
@@ -1151,8 +1171,7 @@ class Game {
                 bgm.pause();
                 bgm.currentTime = 0;
                 bgm.volume = 0.7;
-                setTimeout(() => {
-                    bgm.play().catch(e => console.error('Ошибка музыки:', e));
+                bgm.play().catch(e => console.error('Ошибка музыки:', e));
                 }, 50);
             }
             this.startCountdown();
@@ -1575,28 +1594,35 @@ this.ctx.restore();
         requestAnimationFrame((nextTimestamp) => this.gameLoop(nextTimestamp));
     }
 }
-document.addEventListener('visibilitychange', () => {
+document.addEventListener('visibilitychange', async () => {
 
     const bgm = document.getElementById('bgMusic');
 
     if (!bgm) return;
 
-    // вкладка скрыта
     if (document.hidden) {
 
         bgm.pause();
 
         if (window.game?.sound?.ctx) {
-            window.game.sound.ctx.suspend();
+            await window.game.sound.ctx.suspend();
         }
 
     } else {
 
-        // возвращение в игру
-        bgm.play().catch(() => {});
+        try {
 
-        if (window.game?.sound?.ctx) {
-            window.game.sound.ctx.resume();
+            if (window.game?.sound?.ctx &&
+                window.game.sound.ctx.state === 'suspended') {
+
+                await window.game.sound.ctx.resume();
+            }
+
+            await bgm.play();
+
+        } catch(e) {
+
+            console.log('Музыка ждёт взаимодействия пользователя');
         }
     }
 });
