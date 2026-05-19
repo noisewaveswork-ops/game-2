@@ -908,7 +908,6 @@ class Game {
     }
 
     buildWave(waveNumber) {
-        buildWave(waveNumber) {
 
     const queue = [];
 
