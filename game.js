@@ -1165,17 +1165,24 @@ class Game {
         });
 
         document.getElementById('startButton').addEventListener('click', () => {
-            this.sound.init();
-            const bgm = document.getElementById('bgMusic');
-            if (bgm) {
-                bgm.pause();
-                bgm.currentTime = 0;
-                bgm.volume = 0.7;
-                bgm.play().catch(e => console.error('Ошибка музыки:', e));
-                }, 50);
-            }
-            this.startCountdown();
-        });
+    this.sound.init();
+
+    const bgm = document.getElementById('bgMusic');
+
+    if (bgm) {
+        bgm.pause();
+        bgm.currentTime = 0;
+        bgm.volume = 0.7;
+
+        setTimeout(() => {
+            bgm.play().catch(e =>
+                console.error('Ошибка музыки:', e)
+            );
+        }, 50);
+    }
+
+    this.startCountdown();
+});
 
         document.getElementById('restartButton').addEventListener('click', () => {
             const bgm = document.getElementById('bgMusic');
