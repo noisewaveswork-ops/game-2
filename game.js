@@ -1172,13 +1172,14 @@ class Game {
 
     if (bgm) {
 
-        bgm.pause();
-        bgm.currentTime = 0;
-        bgm.volume = 0.7;
-
         try {
 
-            await bgm.play();
+            bgm.currentTime = 0;
+            bgm.volume = 0.7;
+
+            if (bgm.paused) {
+                await bgm.play();
+            }
 
         } catch(e) {
 
