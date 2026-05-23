@@ -1617,38 +1617,25 @@ this.ctx.restore();
         requestAnimationFrame((nextTimestamp) => this.gameLoop(nextTimestamp));
     }
 }
-document.addEventListener('visibilitychange', async () => {
+if (!document.hidden) {
 
-    const bgm = document.getElementById('bgMusic');
+    try {
 
-    if (!bgm) return;
+        if (window.game?.sound?.ctx &&
+            window.game.sound.ctx.state === 'suspended') {
 
-    if (document.hidden) {
-
-        bgm.pause();
-
-        if (window.game?.sound?.ctx) {
-            await window.game.sound.ctx.suspend();
+            await window.game.sound.ctx.resume();
         }
 
-    } else {
-
-        try {
-
-            if (window.game?.sound?.ctx &&
-                window.game.sound.ctx.state === 'suspended') {
-
-                await window.game.sound.ctx.resume();
-            }
-
+        if (window.game?.gameStarted && bgm.paused) {
             await bgm.play();
-
-        } catch(e) {
-
-            console.log('Музыка ждёт взаимодействия пользователя');
         }
+
+    } catch(e) {
+
+        console.log('Музыка ждёт взаимодействия пользователя');
     }
-});
+}
 
 
 window.addEventListener('DOMContentLoaded', () => {
