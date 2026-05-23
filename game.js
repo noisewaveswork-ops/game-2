@@ -1659,3 +1659,63 @@ document.addEventListener('visibilitychange', async () => {
 window.addEventListener('DOMContentLoaded', () => {
     window.game = new Game();
 });
+
+// ==============================
+// TILDA POPUP CLOSE SUPPORT
+// ==============================
+
+document.addEventListener('click', (e) => {
+
+    // кнопка закрытия попапа Tilda
+    const closeBtn = e.target.closest('.t-popup__close');
+
+    if (closeBtn) {
+
+        const bgm = document.getElementById('bgMusic');
+
+        if (bgm) {
+            bgm.pause();
+            bgm.currentTime = 0;
+        }
+
+        if (window.game?.sound) {
+            window.game.sound.pauseAll();
+        }
+
+        if (window.game) {
+            window.game.gameRunning = false;
+        }
+    }
+});
+
+// если popup скрыли программно
+const observer = new MutationObserver(() => {
+
+    const popup = document.querySelector('.t-popup');
+
+    if (!popup) return;
+
+    const isHidden =
+        popup.style.display === 'none' ||
+        popup.classList.contains('t-popup_hidden');
+
+    if (isHidden) {
+
+        const bgm = document.getElementById('bgMusic');
+
+        if (bgm) {
+            bgm.pause();
+            bgm.currentTime = 0;
+        }
+
+        if (window.game?.sound) {
+            window.game.sound.pauseAll();
+        }
+    }
+});
+
+observer.observe(document.body, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['style', 'class']
+});
