@@ -447,8 +447,12 @@ class Enemy {
     }
 
     ctx.restore();
+
+        hit(damage = 1) {
+    this.health -= damage;
+    return this.health <= 0;
 }
-    }
+}
 
 // ---------- Класс босса ----------
 class Boss {
@@ -960,6 +964,10 @@ if (this.phase === 1) {
     ctx.strokeRect(bx, by, bw, bh);
 
     ctx.restore();
+}
+    hit(damage = 1) {
+    this.health -= damage;
+    return this.health <= 0;
 }
 }
 
