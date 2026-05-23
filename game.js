@@ -448,6 +448,7 @@ class Enemy {
 
     ctx.restore();
 }
+    }
 
 // ---------- Класс босса ----------
 class Boss {
@@ -663,95 +664,303 @@ if (this.phase === 1) {
 }
 
     draw(ctx) {
-        ctx.save();
-        
-        // Тёмный ореол
-        const glow = ctx.createRadialGradient(this.x, this.y, 20, this.x, this.y, 50);
-        glow.addColorStop(0, 'rgba(255,0,35,0.4)');
-        glow.addColorStop(1, 'rgba(255,0,35,0)');
-        ctx.fillStyle = glow;
+
+    ctx.save();
+
+    const pulse =
+        Math.sin(this.timer * 0.08) * 3;
+
+    // =====================================
+    // ТЁМНЫЙ ДЫМ
+    // =====================================
+
+    for (let i = 0; i < 4; i++) {
+
+        const r =
+            55 +
+            i * 10 +
+            pulse;
+
+        const g = ctx.createRadialGradient(
+            this.x,
+            this.y,
+            10,
+            this.x,
+            this.y,
+            r
+        );
+
+        g.addColorStop(0, 'rgba(255,0,35,0.15)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+
+        ctx.fillStyle = g;
+
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 50, 0, Math.PI*2);
+        ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
         ctx.fill();
-
-        // Основное тело
-        const grad = ctx.createRadialGradient(this.x, this.y, 10, this.x, this.y, 40);
-        grad.addColorStop(0, '#ff0000');
-        grad.addColorStop(0.4, '#ff0023');
-        grad.addColorStop(1, '#4a0010');
-        ctx.fillStyle = grad;
-        ctx.shadowBlur = 25;
-        ctx.shadowColor = '#ff0023';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 40, 0, Math.PI*2);
-        ctx.fill();
-
-        // Глаза
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(this.x-18, this.y-10, 10, 0, Math.PI*2);
-        ctx.arc(this.x+18, this.y-10, 10, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = '#000000';
-        ctx.shadowBlur = 0;
-        ctx.beginPath();
-        ctx.arc(this.x-18, this.y-10, 5, 0, Math.PI*2);
-        ctx.arc(this.x+18, this.y-10, 5, 0, Math.PI*2);
-        ctx.fill();
-
-        // Щупальца
-        ctx.strokeStyle = '#ff0023';
-        ctx.lineWidth = 5;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#ff0023';
-        for (let i = 0; i < 6; i++) {
-            const ba = Math.PI/2 + (i-2.5)*0.25;
-            const wiggle = Math.sin(this.timer*0.08 + i)*18;
-            ctx.beginPath();
-            ctx.moveTo(this.x+Math.cos(ba)*30, this.y+Math.sin(ba)*30);
-            ctx.lineTo(
-                this.x+Math.cos(ba)*60 + wiggle*Math.cos(ba+Math.PI/2),
-                this.y+Math.sin(ba)*60 + wiggle*Math.sin(ba+Math.PI/2)
-            );
-            ctx.stroke();
-        }
-        
-        // Полоска здоровья босса
-const bw = 180;
-const bh = 8;
-const bx = 110;
-const by = 45;
-
-ctx.fillStyle = '#111';
-ctx.shadowBlur = 0;
-ctx.fillRect(bx, by, bw, bh);
-
-const hg = ctx.createLinearGradient(bx, 0, bx + bw, 0);
-hg.addColorStop(0, '#ff0000');
-hg.addColorStop(0.5, '#ff9900');
-hg.addColorStop(1, '#ffff00');
-
-ctx.fillStyle = hg;
-ctx.fillRect(
-    bx,
-    by,
-    bw * (this.health / this.maxHealth),
-    bh
-);
-
-ctx.strokeStyle = '#ffffff';
-ctx.lineWidth = 1.5;
-ctx.strokeRect(bx, by, bw, bh);
-
-        ctx.restore();
     }
 
-    hit(damage = 1) {
-        this.health -= damage;
-        return this.health <= 0;
+    // =====================================
+    // ОСНОВНОЕ ТЕЛО
+    // =====================================
+
+    const body = ctx.createRadialGradient(
+        this.x - 10,
+        this.y - 10,
+        8,
+        this.x,
+        this.y,
+        55
+    );
+
+    body.addColorStop(0, '#ff6677');
+    body.addColorStop(0.3, '#ff0023');
+    body.addColorStop(1, '#140004');
+
+    ctx.fillStyle = body;
+
+    ctx.shadowBlur = 35;
+    ctx.shadowColor = '#ff0023';
+
+    ctx.beginPath();
+
+    for (let i = 0; i < 28; i++) {
+
+        const a =
+            (Math.PI * 2 / 28) * i;
+
+        const radius =
+            42 +
+            Math.sin(i * 1.8 + this.timer * 0.09) * 5;
+
+        const px =
+            this.x + Math.cos(a) * radius;
+
+        const py =
+            this.y + Math.sin(a) * radius;
+
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
     }
+
+    ctx.closePath();
+    ctx.fill();
+
+    // =====================================
+    // РОГА
+    // =====================================
+
+    ctx.strokeStyle = '#ff3355';
+    ctx.lineWidth = 6;
+
+    for (let i = -1; i <= 1; i += 2) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            this.x + i * 20,
+            this.y - 35
+        );
+
+        ctx.lineTo(
+            this.x + i * 35,
+            this.y - 70
+        );
+
+        ctx.lineTo(
+            this.x + i * 10,
+            this.y - 50
+        );
+
+        ctx.stroke();
+    }
+
+    // =====================================
+    // ГЛАЗА
+    // =====================================
+
+    ctx.fillStyle = '#ffffff';
+
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#ffffff';
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        this.x - 18,
+        this.y - 10,
+        10,
+        14,
+        -0.2,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.ellipse(
+        this.x + 18,
+        this.y - 10,
+        10,
+        14,
+        0.2,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    // Зрачки
+
+    ctx.fillStyle = '#000000';
+    ctx.shadowBlur = 0;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        this.x - 18,
+        this.y - 8 + Math.sin(this.timer * 0.1),
+        4,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.arc(
+        this.x + 18,
+        this.y - 8 + Math.cos(this.timer * 0.1),
+        4,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    // =====================================
+    // ПАСТЬ
+    // =====================================
+
+    ctx.fillStyle = '#120000';
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        this.x,
+        this.y + 20,
+        24,
+        14 + pulse * 0.3,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    // ЗУБЫ
+
+    ctx.fillStyle = '#ffffff';
+
+    for (let i = -3; i <= 3; i++) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            this.x + i * 7,
+            this.y + 12
+        );
+
+        ctx.lineTo(
+            this.x + i * 7 - 3,
+            this.y + 22
+        );
+
+        ctx.lineTo(
+            this.x + i * 7 + 3,
+            this.y + 22
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+    }
+
+    // =====================================
+    // ЩУПАЛЬЦА
+    // =====================================
+
+    ctx.strokeStyle = '#ff0023';
+    ctx.lineWidth = 5;
+
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ff0023';
+
+    for (let i = 0; i < 8; i++) {
+
+        const ba =
+            Math.PI / 2 +
+            (i - 3.5) * 0.18;
+
+        const wiggle =
+            Math.sin(this.timer * 0.09 + i) * 22;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            this.x + Math.cos(ba) * 30,
+            this.y + Math.sin(ba) * 30
+        );
+
+        ctx.quadraticCurveTo(
+            this.x + wiggle,
+            this.y + 50,
+
+            this.x +
+            Math.cos(ba) * 80,
+
+            this.y +
+            Math.sin(ba) * 80
+        );
+
+        ctx.stroke();
+    }
+
+    // =====================================
+    // HP BAR
+    // =====================================
+
+    const bw = 220;
+    const bh = 10;
+    const bx = 90;
+    const by = 40;
+
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = '#111';
+    ctx.fillRect(bx, by, bw, bh);
+
+    const hp = ctx.createLinearGradient(
+        bx,
+        0,
+        bx + bw,
+        0
+    );
+
+    hp.addColorStop(0, '#ff0000');
+    hp.addColorStop(0.5, '#ff6600');
+    hp.addColorStop(1, '#ffff00');
+
+    ctx.fillStyle = hp;
+
+    ctx.fillRect(
+        bx,
+        by,
+        bw * (this.health / this.maxHealth),
+        bh
+    );
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bx, by, bw, bh);
+
+    ctx.restore();
+}
 }
 
 // ---------- Главный класс игры ----------
