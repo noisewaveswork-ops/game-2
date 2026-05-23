@@ -1208,7 +1208,9 @@ class Game {
     this.startCountdown();
 });
 
-    updateMobilePosition(touches) {
+} // ← ВОТ ЭТОЙ СКОБКИ НЕ ХВАТАЕТ
+
+updateMobilePosition(touches) {
         if (touches.length === 0) return;
         const rect = this.canvas.getBoundingClientRect();
         const scaleX = this.canvas.width / rect.width;
