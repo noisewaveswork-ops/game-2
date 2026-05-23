@@ -1719,3 +1719,32 @@ observer.observe(document.body, {
     attributes: true,
     attributeFilter: ['style', 'class']
 });
+
+
+// =====================================
+// RECEIVE MESSAGE FROM TILDA POPUP
+// =====================================
+
+window.addEventListener('message', async (event) => {
+
+    if (event.data === 'pauseMusic') {
+
+        const bgm = document.getElementById('bgMusic');
+
+        if (bgm) {
+
+            bgm.pause();
+            bgm.currentTime = 0;
+        }
+
+        if (window.game?.sound) {
+
+            window.game.sound.pauseAll();
+        }
+
+        if (window.game) {
+
+            window.game.gameRunning = false;
+        }
+    }
+});
