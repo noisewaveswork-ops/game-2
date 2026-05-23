@@ -1164,36 +1164,49 @@ class Game {
             this.touchStartFingers = 0;
         });
 
-        document.getElementById('startButton').addEventListener('click', () => {
+        document.getElementById('startButton').addEventListener('click', async () => {
+
     this.sound.init();
 
     const bgm = document.getElementById('bgMusic');
 
     if (bgm) {
+
         bgm.pause();
         bgm.currentTime = 0;
         bgm.volume = 0.7;
 
-        setTimeout(() => {
-            bgm.play().catch(e =>
-                console.error('Ошибка музыки:', e)
-            );
-        }, 50);
+        try {
+
+            await bgm.play();
+
+        } catch(e) {
+
+            console.error('Ошибка музыки:', e);
+        }
     }
 
     this.startCountdown();
 });
 
-        document.getElementById('restartButton').addEventListener('click', () => {
-            const bgm = document.getElementById('bgMusic');
-            if (bgm && bgm.paused) {
-                setTimeout(() => {
-                    bgm.play().catch(e => console.error('Ошибка музыки:', e));
-                }, 50);
-            }
-            this.startCountdown();
-        });
+        document.getElementById('restartButton').addEventListener('click', async () => {
+
+    const bgm = document.getElementById('bgMusic');
+
+    if (bgm && bgm.paused) {
+
+        try {
+
+            await bgm.play();
+
+        } catch(e) {
+
+            console.error('Ошибка музыки:', e);
+        }
     }
+
+    this.startCountdown();
+});
 
     updateMobilePosition(touches) {
         if (touches.length === 0) return;
