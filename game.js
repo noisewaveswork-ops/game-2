@@ -298,19 +298,39 @@ class Enemy {
     }
 
     draw(ctx) {
+
     ctx.save();
 
-    // Пульсация
-    const pulse = Math.sin(this.timer * 0.12) * 2;
+    const t = this.timer;
 
-    // Внешний ореол
+    // =========================
+    // OUTER ENERGY RING
+    // =========================
+
+    ctx.strokeStyle = 'rgba(255,0,40,0.35)';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.arc(
+        this.x,
+        this.y,
+        22 + Math.sin(t * 0.08) * 2,
+        0,
+        Math.PI * 2
+    );
+    ctx.stroke();
+
+    // =========================
+    // SHADOW GLOW
+    // =========================
+
     const glow = ctx.createRadialGradient(
         this.x,
         this.y,
-        6,
+        4,
         this.x,
         this.y,
-        30
+        34
     );
 
     glow.addColorStop(0, 'rgba(255,0,35,0.35)');
@@ -319,130 +339,154 @@ class Enemy {
     ctx.fillStyle = glow;
 
     ctx.beginPath();
-    ctx.arc(this.x, this.y, 30 + pulse, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, 34, 0, Math.PI * 2);
     ctx.fill();
 
-    // Основное тело
-    const grad = ctx.createRadialGradient(
-        this.x - 4,
-        this.y - 4,
-        4,
-        this.x,
-        this.y,
-        18
+    // =========================
+    // MAIN BODY
+    // =========================
+
+    ctx.translate(this.x, this.y);
+
+    ctx.rotate(
+        Math.sin(t * 0.02) * 0.15
     );
 
-    grad.addColorStop(0, '#ff5566');
-    grad.addColorStop(0.45, '#ff0023');
-    grad.addColorStop(1, '#2b0008');
+    const bodyGrad = ctx.createLinearGradient(
+        -20,
+        -20,
+        20,
+        20
+    );
 
-    ctx.fillStyle = grad;
-    ctx.shadowBlur = 18;
+    bodyGrad.addColorStop(0, '#5a0d16');
+    bodyGrad.addColorStop(0.5, '#ff0023');
+    bodyGrad.addColorStop(1, '#2a0006');
+
+    ctx.fillStyle = bodyGrad;
+
+    ctx.shadowBlur = 20;
     ctx.shadowColor = '#ff0023';
 
-    // Рваная форма
+    // central hull
     ctx.beginPath();
 
-    for (let i = 0; i < 16; i++) {
-
-        const angle = (Math.PI * 2 / 16) * i;
-
-        const radius =
-            14 +
-            Math.sin(i * 2.3 + this.timer * 0.08) * 2;
-
-        const px = this.x + Math.cos(angle) * radius;
-        const py = this.y + Math.sin(angle) * radius;
-
-        if (i === 0) {
-            ctx.moveTo(px, py);
-        } else {
-            ctx.lineTo(px, py);
-        }
-    }
+    ctx.moveTo(0, -20);
+    ctx.lineTo(18, -6);
+    ctx.lineTo(14, 18);
+    ctx.lineTo(0, 10);
+    ctx.lineTo(-14, 18);
+    ctx.lineTo(-18, -6);
 
     ctx.closePath();
     ctx.fill();
 
-    // Шипы
-    ctx.strokeStyle = '#ff3355';
-    ctx.lineWidth = 2;
+    // =========================
+    // SIDE WINGS
+    // =========================
 
-    for (let i = 0; i < 6; i++) {
+    ctx.fillStyle = '#2d2d38';
 
-        const angle =
-            this.timer * 0.01 +
-            (Math.PI * 2 / 6) * i;
+    ctx.beginPath();
+    ctx.moveTo(-14, -4);
+    ctx.lineTo(-28, 2);
+    ctx.lineTo(-16, 10);
+    ctx.closePath();
+    ctx.fill();
 
-        const x1 = this.x + Math.cos(angle) * 12;
-        const y1 = this.y + Math.sin(angle) * 12;
+    ctx.beginPath();
+    ctx.moveTo(14, -4);
+    ctx.lineTo(28, 2);
+    ctx.lineTo(16, 10);
+    ctx.closePath();
+    ctx.fill();
 
-        const x2 = this.x + Math.cos(angle) * 20;
-        const y2 = this.y + Math.sin(angle) * 20;
+    // =========================
+    // MECHANICAL DETAILS
+    // =========================
+
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 1.5;
+
+    for (let i = -1; i <= 1; i++) {
 
         ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
+
+        ctx.moveTo(i * 6, -12);
+        ctx.lineTo(i * 4, 12);
+
         ctx.stroke();
     }
 
-    // Глаз
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = '#ffffff';
+    // =========================
+    // CORE
+    // =========================
 
-    ctx.fillStyle = '#ffffff';
-
-    ctx.beginPath();
-    ctx.ellipse(
-        this.x,
-        this.y - 1,
-        5,
-        7,
+    const core = ctx.createRadialGradient(
+        0,
+        -2,
+        1,
         0,
         0,
-        Math.PI * 2
+        10
     );
 
-    ctx.fill();
+    core.addColorStop(0, '#ffffff');
+    core.addColorStop(0.3, '#ff8899');
+    core.addColorStop(1, '#ff0023');
 
-    // Зрачок
-    ctx.shadowBlur = 0;
+    ctx.fillStyle = core;
 
-    ctx.fillStyle = '#000000';
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = '#ff3355';
 
     ctx.beginPath();
-    ctx.arc(
-        this.x + Math.sin(this.timer * 0.08) * 1.5,
-        this.y,
-        2.5,
-        0,
-        Math.PI * 2
-    );
-
+    ctx.arc(0, 0, 7, 0, Math.PI * 2);
     ctx.fill();
 
-    // HP bar
+    // =========================
+    // ENERGY LINES
+    // =========================
+
+    ctx.strokeStyle = '#ff3355';
+    ctx.lineWidth = 2;
+
+    for (let i = 0; i < 4; i++) {
+
+        const y = -12 + i * 8;
+
+        ctx.beginPath();
+        ctx.moveTo(-10, y);
+        ctx.lineTo(10, y);
+        ctx.stroke();
+    }
+
+    // =========================
+    // HP BAR
+    // =========================
+
+    ctx.setTransform(1,0,0,1,0,0);
+
     if (this.health < this.maxHealth) {
 
-        const barWidth = 28;
-        const barHeight = 3;
+        const w = 30;
 
-        ctx.fillStyle = '#300';
+        ctx.fillStyle = '#220000';
 
         ctx.fillRect(
-            this.x - barWidth / 2,
-            this.y - 24,
-            barWidth,
-            barHeight
+            this.x - w/2,
+            this.y - 32,
+            w,
+            4
         );
 
         ctx.fillStyle = '#ff3355';
 
         ctx.fillRect(
-            this.x - barWidth / 2,
-            this.y - 24,
-            barWidth * (this.health / this.maxHealth),
-            barHeight
+            this.x - w/2,
+            this.y - 32,
+            w * (this.health / this.maxHealth),
+            4
         );
     }
 
@@ -671,270 +715,261 @@ if (this.phase === 1) {
 
     ctx.save();
 
-    const pulse =
-        Math.sin(this.timer * 0.08) * 3;
+    const t = this.timer;
 
     // =====================================
-    // ТЁМНЫЙ ДЫМ
+    // MASSIVE BACK GLOW
     // =====================================
 
-    for (let i = 0; i < 4; i++) {
-
-        const r =
-            55 +
-            i * 10 +
-            pulse;
-
-        const g = ctx.createRadialGradient(
-            this.x,
-            this.y,
-            10,
-            this.x,
-            this.y,
-            r
-        );
-
-        g.addColorStop(0, 'rgba(255,0,35,0.15)');
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-
-        ctx.fillStyle = g;
-
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    // =====================================
-    // ОСНОВНОЕ ТЕЛО
-    // =====================================
-
-    const body = ctx.createRadialGradient(
-        this.x - 10,
-        this.y - 10,
-        8,
+    const aura = ctx.createRadialGradient(
         this.x,
         this.y,
-        55
+        20,
+        this.x,
+        this.y,
+        140
     );
 
-    body.addColorStop(0, '#ff6677');
-    body.addColorStop(0.3, '#ff0023');
+    aura.addColorStop(0, 'rgba(255,0,35,0.35)');
+    aura.addColorStop(1, 'rgba(255,0,35,0)');
+
+    ctx.fillStyle = aura;
+
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 140, 0, Math.PI * 2);
+    ctx.fill();
+
+    // =====================================
+    // ROTATING HALO
+    // =====================================
+
+    ctx.translate(this.x, this.y);
+
+    ctx.rotate(t * 0.01);
+
+    ctx.strokeStyle = 'rgba(255,80,100,0.4)';
+    ctx.lineWidth = 4;
+
+    for (let i = 0; i < 3; i++) {
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            0,
+            70 + i * 12,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+    }
+
+    ctx.rotate(-t * 0.01);
+
+    // =====================================
+    // MAIN BODY
+    // =====================================
+
+    const body = ctx.createLinearGradient(
+        -80,
+        -80,
+        80,
+        80
+    );
+
+    body.addColorStop(0, '#6b0f18');
+    body.addColorStop(0.35, '#ff0023');
     body.addColorStop(1, '#140004');
 
     ctx.fillStyle = body;
 
-    ctx.shadowBlur = 35;
+    ctx.shadowBlur = 40;
     ctx.shadowColor = '#ff0023';
 
+    // central armor
     ctx.beginPath();
 
-    for (let i = 0; i < 28; i++) {
+    ctx.moveTo(0, -70);
 
-        const a =
-            (Math.PI * 2 / 28) * i;
+    ctx.lineTo(58, -40);
+    ctx.lineTo(72, 0);
+    ctx.lineTo(50, 60);
 
-        const radius =
-            42 +
-            Math.sin(i * 1.8 + this.timer * 0.09) * 5;
+    ctx.lineTo(0, 80);
 
-        const px =
-            this.x + Math.cos(a) * radius;
-
-        const py =
-            this.y + Math.sin(a) * radius;
-
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-    }
+    ctx.lineTo(-50, 60);
+    ctx.lineTo(-72, 0);
+    ctx.lineTo(-58, -40);
 
     ctx.closePath();
     ctx.fill();
 
     // =====================================
-    // РОГА
+    // SIDE CANNONS
     // =====================================
 
-    ctx.strokeStyle = '#ff3355';
-    ctx.lineWidth = 6;
+    ctx.fillStyle = '#252530';
 
     for (let i = -1; i <= 1; i += 2) {
 
+        ctx.fillRect(
+            i * 70 - 12,
+            -16,
+            24,
+            64
+        );
+
+        ctx.fillStyle = '#ff0023';
+
         ctx.beginPath();
 
-        ctx.moveTo(
-            this.x + i * 20,
-            this.y - 35
+        ctx.arc(
+            i * 70,
+            48,
+            10,
+            0,
+            Math.PI * 2
         );
 
-        ctx.lineTo(
-            this.x + i * 35,
-            this.y - 70
-        );
+        ctx.fill();
 
-        ctx.lineTo(
-            this.x + i * 10,
-            this.y - 50
-        );
+        ctx.fillStyle = '#252530';
+    }
+
+    // =====================================
+    // CENTRAL CORE
+    // =====================================
+
+    const core = ctx.createRadialGradient(
+        0,
+        -10,
+        2,
+        0,
+        0,
+        26
+    );
+
+    core.addColorStop(0, '#ffffff');
+    core.addColorStop(0.25, '#ffcccc');
+    core.addColorStop(1, '#ff0023');
+
+    ctx.fillStyle = core;
+
+    ctx.shadowBlur = 35;
+    ctx.shadowColor = '#ff3355';
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 24, 0, Math.PI * 2);
+    ctx.fill();
+
+    // =====================================
+    // ARMOR LINES
+    // =====================================
+
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 2;
+
+    for (let i = -2; i <= 2; i++) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(i * 12, -50);
+        ctx.lineTo(i * 8, 60);
 
         ctx.stroke();
     }
 
     // =====================================
-    // ГЛАЗА
-    // =====================================
-
-    ctx.fillStyle = '#ffffff';
-
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = '#ffffff';
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        this.x - 18,
-        this.y - 10,
-        10,
-        14,
-        -0.2,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.ellipse(
-        this.x + 18,
-        this.y - 10,
-        10,
-        14,
-        0.2,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fill();
-
-    // Зрачки
-
-    ctx.fillStyle = '#000000';
-    ctx.shadowBlur = 0;
-
-    ctx.beginPath();
-
-    ctx.arc(
-        this.x - 18,
-        this.y - 8 + Math.sin(this.timer * 0.1),
-        4,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.arc(
-        this.x + 18,
-        this.y - 8 + Math.cos(this.timer * 0.1),
-        4,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fill();
-
-    // =====================================
-    // ПАСТЬ
-    // =====================================
-
-    ctx.fillStyle = '#120000';
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        this.x,
-        this.y + 20,
-        24,
-        14 + pulse * 0.3,
-        0,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fill();
-
-    // ЗУБЫ
-
-    ctx.fillStyle = '#ffffff';
-
-    for (let i = -3; i <= 3; i++) {
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            this.x + i * 7,
-            this.y + 12
-        );
-
-        ctx.lineTo(
-            this.x + i * 7 - 3,
-            this.y + 22
-        );
-
-        ctx.lineTo(
-            this.x + i * 7 + 3,
-            this.y + 22
-        );
-
-        ctx.closePath();
-
-        ctx.fill();
-    }
-
-    // =====================================
-    // ЩУПАЛЬЦА
+    // LOWER TENTACLE ENGINES
     // =====================================
 
     ctx.strokeStyle = '#ff0023';
     ctx.lineWidth = 5;
 
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = '#ff0023';
+    for (let i = 0; i < 6; i++) {
 
-    for (let i = 0; i < 8; i++) {
-
-        const ba =
+        const angle =
             Math.PI / 2 +
-            (i - 3.5) * 0.18;
+            (i - 2.5) * 0.24;
 
-        const wiggle =
-            Math.sin(this.timer * 0.09 + i) * 22;
+        const len =
+            70 +
+            Math.sin(t * 0.08 + i) * 18;
 
         ctx.beginPath();
 
         ctx.moveTo(
-            this.x + Math.cos(ba) * 30,
-            this.y + Math.sin(ba) * 30
+            Math.cos(angle) * 40,
+            Math.sin(angle) * 40
         );
 
-        ctx.quadraticCurveTo(
-            this.x + wiggle,
-            this.y + 50,
-
-            this.x +
-            Math.cos(ba) * 80,
-
-            this.y +
-            Math.sin(ba) * 80
+        ctx.lineTo(
+            Math.cos(angle) * len,
+            Math.sin(angle) * len
         );
 
         ctx.stroke();
     }
 
     // =====================================
-    // HP BAR
+    // PHASE EFFECTS
     // =====================================
 
-    const bw = 220;
-    const bh = 10;
-    const bx = 90;
-    const by = 40;
+    if (this.phase >= 2) {
 
-    ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#ffffff55';
+
+        ctx.beginPath();
+        ctx.arc(
+            0,
+            0,
+            42 + Math.sin(t * 0.2) * 4,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+    }
+
+    if (this.phase >= 3) {
+
+        for (let i = 0; i < 8; i++) {
+
+            const a =
+                t * 0.04 +
+                (Math.PI * 2 / 8) * i;
+
+            ctx.fillStyle = '#ff3355';
+
+            ctx.beginPath();
+
+            ctx.arc(
+                Math.cos(a) * 90,
+                Math.sin(a) * 90,
+                5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+        }
+    }
+
+    // =====================================
+    // RESET TRANSFORM
+    // =====================================
+
+    ctx.setTransform(1,0,0,1,0,0);
+
+    // =====================================
+    // BOSS HP BAR
+    // =====================================
+
+    const bw = 240;
+    const bh = 12;
+    const bx = 80;
+    const by = 30;
 
     ctx.fillStyle = '#111';
     ctx.fillRect(bx, by, bw, bh);
