@@ -453,6 +453,7 @@ hit(damage = 1) {
     this.health -= damage;
     return this.health <= 0;
 }
+    }
 // ---------- Класс босса ----------
 class Boss {
     constructor(x, y, game) {
